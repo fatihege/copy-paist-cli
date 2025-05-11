@@ -30,3 +30,8 @@ export interface ContinueRefactorResponse {
         reason: string;
     }>;
 }
+
+export interface FileChange {
+    filePath: string; // Path to the file being changed
+    fullContent: string; // Full content of the file after refactoring
+}
