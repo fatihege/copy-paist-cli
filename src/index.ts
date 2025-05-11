@@ -3,6 +3,8 @@
 import {Command} from 'commander';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
+// import the dotenv package to load environment variables from a .env file
+import dotenv from 'dotenv';
 
 const program = new Command();
 
@@ -35,7 +37,7 @@ async function showMainMenu(options: any) {
         return;
     }
 
-    let result;
+    let result; // Placeholder for the result of the command
     if (command === 'refactor') {
         console.log(chalk.bold.green('🔧 Refactor Code'));
     } else if (command === 'explain') {
@@ -49,8 +51,13 @@ async function showMainMenu(options: any) {
     }
 }
 
+// Define the main action for the program
 program.action(async (options) => {
     await showMainMenu(options);
 });
 
+// Parse command line arguments
 program.parse(process.argv);
+
+// Load environment variables from .env file
+dotenv.config();
