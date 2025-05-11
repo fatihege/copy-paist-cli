@@ -3,8 +3,8 @@ import chalk from 'chalk';
 import ora, {Ora} from 'ora';
 import {diffLines} from 'diff';
 import path from 'path';
-import {FileManager} from './file-manager';
-import {FileRequest, RefactorAnalysis, RefactorChange, RefactorComplete, RefactorProgress} from './types';
+import {FileManager} from '../services/file-manager';
+import {FileRequest, RefactorAnalysis, RefactorChange, RefactorComplete, RefactorProgress} from '../types';
 
 /**
  * UI class for handling user interactions and displaying information.
@@ -366,22 +366,6 @@ export class UI {
                         : 'Line number out of range',
             }
         ];
-
-        const {action} = await inquirer.prompt([
-            {
-                type: 'list',
-                name: 'action',
-                message: 'Proceed with line selection?',
-                choices: [
-                    {name: 'Select line range', value: 'SELECT'},
-                    {name: '⬅️ Go back', value: 'BACK'}
-                ]
-            }
-        ]);
-
-        if (action === 'BACK') {
-            return 'BACK';
-        }
 
         const {startLine, endLine} = await inquirer.prompt(lineChoices);
 

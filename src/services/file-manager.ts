@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 import {glob} from 'glob';
-import {FileChange} from './types';
+import {FileChange} from '../types';
 
 /**
  * FileManager class to handle file operations in a project directory.

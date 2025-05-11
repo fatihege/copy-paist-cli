@@ -2,14 +2,14 @@
   "name": "copy-paist-cli",
   "version": "0.0.1",
   "description": "CLI client for AI coding assistant Copy Paist",
-  "main": "dist/index.js",
+  "main": "dist/cli.js",
   "bin": {
-    "copy-paist": "dist/index.js"
+    "copy-paist": "dist/cli.js"
   },
   "scripts": {
     "build": "tsc",
-    "start": "node dist/index.js",
-    "dev": "ts-node src/index.ts"
+    "start": "node dist/cli.js",
+    "dev": "ts-node src/cli.ts"
   },
   "dependencies": {
     "axios": "^1.9.0",

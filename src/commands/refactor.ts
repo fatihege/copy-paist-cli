@@ -1,7 +1,7 @@
-import {ApiClient} from '../api-client';
-import {FileManager} from '../file-manager';
-import {UI} from '../ui';
-import {SocketClient} from '../socket-client';
+import {ApiClient} from '../services/api-client';
+import {FileManager} from '../services/file-manager';
+import {UI} from '../ui/ui';
+import {SocketClient} from '../services/socket-client';
 import {FileRequest, RefactorAnalysis, RefactorComplete, RefactorProgress} from '../types';
 import inquirer from 'inquirer';
 import chalk from 'chalk';
@@ -167,7 +167,7 @@ async function processStreamingResponse(sessionId: string): Promise<{
             cleanupListeners();
 
             try {
-                const jsonMatch = accumulatedJson.match(/```json\n([\s\S]*?)\n```/);
+                const jsonMatch = accumulatedJson.match(/```(?:json)?\n([\s\S]*?)\n```/);
                 const parsed = JSON.parse(jsonMatch ? jsonMatch[1] : accumulatedJson);
                 resolve({type: parsed.type, data: parsed});
             } catch (error) {

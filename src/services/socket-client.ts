@@ -6,7 +6,7 @@ export class SocketClient {
 
     private constructor() {
         // Set the socket connection to the server
-        this.socket = io(process.env.API_URL || 'http://localhost:3000', {
+        this.socket = io(process.env.API_URL || 'http://localhost:3001', {
             transports: ['websocket'],
         });
     }
