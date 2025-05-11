@@ -5,6 +5,10 @@ import chalk from 'chalk';
 import inquirer from 'inquirer';
 // import the dotenv package to load environment variables from a .env file
 import dotenv from 'dotenv';
+import {handleRefactor} from './commands/refactor';
+import {ApiClient} from './api-client';
+import {FileManager} from './file-manager';
+import {UI} from './ui';
 
 const program = new Command();
 
@@ -37,9 +41,13 @@ async function showMainMenu(options: any) {
         return;
     }
 
+    const apiClient = new ApiClient();
+    const fileManager = new FileManager(options.dir);
+    const ui = new UI(fileManager);
+
     let result; // Placeholder for the result of the command
     if (command === 'refactor') {
-        console.log(chalk.bold.green('🔧 Refactor Code'));
+        result = await handleRefactor(apiClient, fileManager, ui, options);
     } else if (command === 'explain') {
         console.log(chalk.bold.green('📚 Explain Code'));
     } else if (command === 'generate') {
