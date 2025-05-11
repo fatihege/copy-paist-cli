@@ -48,16 +48,18 @@ export interface RefactorAnalysis {
 
 export interface RefactorProgress {
     type: string; // Type of progress update (e.g., "REFACTOR_PROGRESS")
-    changes: Array<{ // List of changes made during refactoring
-        filePath: string; // Path to the file being modified
-        type: string; // Type of change (e.g., "edit", "add", "delete")
-        location: string; // Location of the change in the code (e.g., line numbers affected)
-        originalCode: string; // Code before the change
-        newCode: string; // Refactored code
-        explanation: string; // Explanation of why this improves the code
-    }>;
+    changes: RefactorChange[]; // List of changes made during refactoring
     progress: number; // Percentage of completion as an integer (0-100)
     nextStep: string | null; // Description of what will be done next or null if complete
+}
+
+export interface RefactorChange {
+    filePath: string; // Path to the file being modified
+    type: string; // Type of change (e.g., "edit", "add", "delete")
+    location: string; // Location of the change in the code (e.g., line numbers affected)
+    originalCode: string; // Code before the change
+    newCode: string; // Refactored code
+    explanation: string; // Explanation of why this improves the code
 }
 
 export interface RefactorComplete {

@@ -3,7 +3,6 @@
 import {Command} from 'commander';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
-// import the dotenv package to load environment variables from a .env file
 import dotenv from 'dotenv';
 import {handleRefactor} from './commands/refactor';
 import {ApiClient} from './api-client';

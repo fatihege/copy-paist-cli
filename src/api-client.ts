@@ -1,10 +1,5 @@
 import axios from 'axios';
-import {
-    ContinueRefactorRequest,
-    ContinueRefactorResponse,
-    RefactorRequest,
-    RefactorResponse
-} from './types';
+import {ContinueRefactorRequest, ContinueRefactorResponse, RefactorRequest, RefactorResponse} from './types';
 import {SocketClient} from './socket-client';
 
 /**

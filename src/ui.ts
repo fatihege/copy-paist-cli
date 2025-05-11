@@ -1,15 +1,10 @@
 import inquirer from 'inquirer';
 import chalk from 'chalk';
-import ora from 'ora';
+import ora, {Ora} from 'ora';
 import {diffLines} from 'diff';
 import path from 'path';
 import {FileManager} from './file-manager';
-import {
-    FileRequest,
-    RefactorAnalysis,
-    RefactorComplete,
-    RefactorProgress,
-} from './types';
+import {FileRequest, RefactorAnalysis, RefactorChange, RefactorComplete, RefactorProgress} from './types';
 
 /**
  * UI class for handling user interactions and displaying information.
@@ -23,6 +18,11 @@ export class UI {
         this.fileManager = fileManager;
     }
 
+    /**
+     * Selects a file using an interactive file explorer.
+     * Allows the user to navigate directories and select files.
+     * @returns {Promise<string>} - The selected file path or 'BACK' to go back.
+     */
     async selectFileWithExplorer(): Promise<string> {
         let selectedFile: string | null | 'BACK' = null; // Initialize selectedFile to null
         let currentDir = '.'; // Start in the current directory
@@ -148,7 +148,10 @@ export class UI {
             } else if (selection === 'GO_UP') {
                 currentDir = path.dirname(currentDir);
             } else if (selection === 'RECENT_FILES') {
-                const recentChoices: {name: string, value: {type: string, path: string} | string}[] = recentFiles.map(file => ({
+                const recentChoices: {
+                    name: string,
+                    value: { type: string, path: string } | string
+                }[] = recentFiles.map(file => ({
                     name: file,
                     value: {type: 'FILE', path: file}
                 }));
@@ -191,7 +194,10 @@ export class UI {
                     continue;
                 }
 
-                const searchChoices: {name: string, value: {type: string, path: string} | string}[] = searchResults.map(file => ({
+                const searchChoices: {
+                    name: string,
+                    value: { type: string, path: string } | string
+                }[] = searchResults.map(file => ({
                     name: file,
                     value: {type: 'FILE', path: file}
                 }));
@@ -256,6 +262,12 @@ export class UI {
         return selectedFile;
     }
 
+    /**
+     * Selects lines from a file using an interactive line selection interface.
+     * Allows the user to navigate through lines, select a range, or select the entire file.
+     * @param {string} filePath - The path of the file to select lines from.
+     * @returns {Promise<{code: string, startLine: number, endLine: number} | 'BACK'>} - The selected lines or 'BACK' to go back.
+     */
     async selectLines(filePath: string): Promise<{
         code: string;
         startLine: number;
@@ -377,6 +389,11 @@ export class UI {
         return {code, startLine, endLine};
     }
 
+    /**
+     * Confirms the refactoring action with the user.
+     * Displays the changes and asks for confirmation to apply or discard them.
+     * @returns {Promise<boolean>} - True if the user confirms, false otherwise.
+     */
     async confirmRefactoring(): Promise<boolean> {
         const {confirm} = await inquirer.prompt([
             {
@@ -393,6 +410,10 @@ export class UI {
         return confirm;
     }
 
+    /**
+     * Displays the analysis of the code, including issues and potential refactorings.
+     * @param {RefactorAnalysis} analysis - The analysis object containing issues and refactorings.
+     */
     displayAnalysis(analysis: RefactorAnalysis): void {
         console.log(chalk.bold.blue('\n🔍 Code Analysis:'));
 
@@ -422,6 +443,12 @@ export class UI {
         console.log();
     }
 
+    /**
+     * Handles file requests from the AI assistant.
+     * Displays the reason for the request and fetches the requested files.
+     * @param {FileRequest} request - The file request object containing requested files and reason.
+     * @returns {Promise<Record<string, string>>} - A promise that resolves to an object containing file contents.
+     */
     async handleFileRequest(
         request: FileRequest
     ): Promise<Record<string, string>> {
@@ -455,6 +482,11 @@ export class UI {
         return fileContents;
     }
 
+    /**
+     * Displays the progress of the refactoring process.
+     * Shows the percentage of completion and details of each change.
+     * @param {RefactorProgress} progress - The progress object containing changes and next steps.
+     */
     displayRefactorProgress(progress: RefactorProgress): void {
         console.log(
             chalk.bold.blue(`\n🔄 Refactoring Progress: ${progress.progress}%`)
@@ -475,14 +507,68 @@ export class UI {
         }
     }
 
-    private displayDifference(change: {
-        filePath: string;
-        type: string;
-        location?: string;
-        originalCode?: string;
-        newCode: string;
-        explanation: string
-    }) {
+    /**
+     * Displays the summary of the refactoring process.
+     * Shows the summary, improvements, testing recommendations, and files changed.
+     * @param {RefactorComplete} result - The result object containing summary and changes.
+     */
+    displayRefactorCompletionSummary(result: RefactorComplete): void {
+        console.log(chalk.bold.green('\n✅ Refactoring Complete!'));
+        console.log(chalk.bold('\nSummary:'));
+        console.log(result.summary);
+
+        console.log(chalk.bold('\nImprovements:'));
+        result.improvements.forEach((improvement, index) => {
+            console.log(`  ${index + 1}. ${improvement}`);
+        });
+
+        console.log(chalk.bold('\nTesting Recommendations:'));
+        result.testingRecommendations.forEach((recommendation, index) => {
+            console.log(`  ${index + 1}. ${recommendation}`);
+        });
+
+        console.log(chalk.bold('\nFiles Changed:'));
+        result.changes.forEach((change) => {
+            console.log(`  - ${change.filePath}`);
+        });
+    }
+
+    /**
+     * Displays a message indicating that the refactoring process is in progress.
+     * @param {string} message - The message to display.
+     * @returns {Ora} - The spinner instance for further control.
+     */
+    showSpinner(message: string): Ora {
+        return ora(message).start();
+    }
+
+    /**
+     * Asks the user for navigation options after a task is completed.
+     * Provides options to return to the main menu or exit the program.
+     * @param {string} message - The message to display to the user.
+     * @returns {Promise<string>} - The user's choice (MAIN_MENU or EXIT).
+     */
+    async askNavigation(message: string = 'What would you like to do next?'): Promise<string> {
+        const {action} = await inquirer.prompt([
+            {
+                type: 'list',
+                name: 'action',
+                message,
+                choices: [
+                    {name: 'Return to main menu', value: 'MAIN_MENU'},
+                    {name: 'Exit program', value: 'EXIT'}
+                ]
+            }
+        ]);
+        return action;
+    }
+
+    /**
+     * Displays the difference between the original and new code.
+     * Uses color coding to indicate additions, removals, and context.
+     * @param {RefactorChange} change - The change object containing original and new code.
+     */
+    private displayDifference(change: RefactorChange) {
         console.log('\nDiff:');
         const parts = diffLines(change.originalCode || '', change.newCode);
         parts.forEach((part: any) => {
@@ -506,45 +592,5 @@ export class UI {
                 }
             }
         });
-    }
-
-    displayRefactorCompletionSummary(result: RefactorComplete): void {
-        console.log(chalk.bold.green('\n✅ Refactoring Complete!'));
-        console.log(chalk.bold('\nSummary:'));
-        console.log(result.summary);
-
-        console.log(chalk.bold('\nImprovements:'));
-        result.improvements.forEach((improvement, index) => {
-            console.log(`  ${index + 1}. ${improvement}`);
-        });
-
-        console.log(chalk.bold('\nTesting Recommendations:'));
-        result.testingRecommendations.forEach((recommendation, index) => {
-            console.log(`  ${index + 1}. ${recommendation}`);
-        });
-
-        console.log(chalk.bold('\nFiles Changed:'));
-        result.changes.forEach((change) => {
-            console.log(`  - ${change.filePath}`);
-        });
-    }
-
-    showSpinner(message: string) {
-        return ora(message).start();
-    }
-
-    async askNavigation(message = 'What would you like to do next?') {
-        const {action} = await inquirer.prompt([
-            {
-                type: 'list',
-                name: 'action',
-                message,
-                choices: [
-                    {name: 'Return to main menu', value: 'MAIN_MENU'},
-                    {name: 'Exit program', value: 'EXIT'}
-                ]
-            }
-        ]);
-        return action;
     }
 }
