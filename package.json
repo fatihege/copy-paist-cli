@@ -1,7 +1,7 @@
 {
   "name": "copy-paist-cli",
   "version": "0.0.1",
-  "description": "CLI tool for AI coding assistant Copy Paist",
+  "description": "CLI client for AI coding assistant Copy Paist",
   "main": "dist/index.js",
   "bin": {
     "copy-paist": "dist/index.js"
