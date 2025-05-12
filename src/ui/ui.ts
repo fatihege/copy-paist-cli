@@ -4,7 +4,14 @@ import ora, {Ora} from 'ora';
 import {diffLines} from 'diff';
 import path from 'path';
 import {FileManager} from '../services/file-manager';
-import {FileRequest, RefactorAnalysis, RefactorChange, RefactorComplete, RefactorProgress} from '../types';
+import {
+    FileRequest,
+    GenerationProgress,
+    RefactorAnalysis,
+    CodeChange,
+    RefactorComplete,
+    RefactorProgress, GenerationComplete
+} from '../types';
 
 /**
  * UI class for handling user interactions and displaying information.
@@ -78,20 +85,18 @@ export class UI {
             console.clear();
             const choices = [];
 
-            if (currentDir !== '.') {
+            if (currentDir !== '.')
                 choices.push({
                     name: '⬆️ ../ (Go up a directory)',
                     value: 'GO_UP'
                 });
-            }
 
             const recentFiles = this.fileManager.getRecentFiles();
-            if (recentFiles.length > 0) {
+            if (recentFiles.length > 0)
                 choices.push({
                     name: '📋 Recent Files',
                     value: 'RECENT_FILES'
                 });
-            }
 
             const directories = await this.fileManager.listDirectories(currentDir);
             directories.forEach(dir => {
@@ -143,11 +148,9 @@ export class UI {
                 }
             ]);
 
-            if (selection === 'BACK') {
-                return 'BACK';
-            } else if (selection === 'GO_UP') {
-                currentDir = path.dirname(currentDir);
-            } else if (selection === 'RECENT_FILES') {
+            if (selection === 'BACK') return 'BACK';
+            else if (selection === 'GO_UP') currentDir = path.dirname(currentDir);
+            else if (selection === 'RECENT_FILES') {
                 const recentChoices: {
                     name: string,
                     value: { type: string, path: string } | string
@@ -170,12 +173,9 @@ export class UI {
                     }
                 ]);
 
-                if (recentFile === 'BACK_TO_BROWSER') {
-                    continue;
-                }
-                if (recentFile.type === 'FILE') {
+                if (recentFile === 'BACK_TO_BROWSER') continue;
+                if (recentFile.type === 'FILE')
                     selectedFile = recentFile.path;
-                }
             } else if (selection === 'SEARCH') {
                 const {searchQuery} = await inquirer.prompt([
                     {
@@ -216,13 +216,10 @@ export class UI {
                     }
                 ]);
 
-                if (selectedSearchResult === 'BACK_TO_BROWSER') {
-                    continue;
-                }
+                if (selectedSearchResult === 'BACK_TO_BROWSER') continue;
 
-                if (selectedSearchResult.type === 'FILE') {
+                if (selectedSearchResult.type === 'FILE')
                     selectedFile = selectedSearchResult.path;
-                }
             } else if (selection === 'CHANGE_PATTERN') {
                 const {newPattern} = await inquirer.prompt([
                     {
@@ -233,9 +230,7 @@ export class UI {
                     }
                 ]);
 
-                if (newPattern === 'BACK') {
-                    continue;
-                }
+                if (newPattern === 'BACK') continue;
 
                 filePattern = newPattern;
 
@@ -251,11 +246,8 @@ export class UI {
                     filePattern = customPattern;
                 }
             } else if (selection && typeof selection === 'object') {
-                if (selection.type === 'DIRECTORY') {
-                    currentDir = selection.path;
-                } else if (selection.type === 'FILE') {
-                    selectedFile = selection.path;
-                }
+                if (selection.type === 'DIRECTORY') currentDir = selection.path;
+                else if (selection.type === 'FILE') selectedFile = selection.path;
             }
         }
 
@@ -308,11 +300,9 @@ export class UI {
                 }
             ]);
 
-            if (navigation === 'BACK') {
-                return 'BACK';
-            } else if (navigation === 'SELECT') {
-                break;
-            } else if (navigation === 'NEXT') {
+            if (navigation === 'BACK') return 'BACK';
+            else if (navigation === 'SELECT') break;
+            else if (navigation === 'NEXT') {
                 if (endDisplay < lines.length) {
                     startDisplay = endDisplay;
                     endDisplay = Math.min(lines.length, startDisplay + 20);
@@ -335,13 +325,12 @@ export class UI {
 
                 startDisplay = Math.max(0, jumpLine - 11);
                 endDisplay = Math.min(lines.length, startDisplay + 20);
-            } else if (navigation === 'ALL') {
+            } else if (navigation === 'ALL')
                 return {
                     code: content,
                     startLine: 1,
                     endLine: lines.length
                 };
-            }
         }
 
         const lineChoices = [
@@ -374,11 +363,11 @@ export class UI {
     }
 
     /**
-     * Confirms the refactoring action with the user.
+     * Confirms the code change action with the user.
      * Displays the changes and asks for confirmation to apply or discard them.
      * @returns {Promise<boolean>} - True if the user confirms, false otherwise.
      */
-    async confirmRefactoring(): Promise<boolean> {
+    async confirmCodeChanges(): Promise<boolean> {
         const {confirm} = await inquirer.prompt([
             {
                 type: 'list',
@@ -401,9 +390,9 @@ export class UI {
     displayAnalysis(analysis: RefactorAnalysis): void {
         console.log(chalk.bold.blue('\n🔍 Code Analysis:'));
 
-        if (analysis.issues.length === 0) {
+        if (analysis.issues.length === 0)
             console.log(chalk.green('  No major issues found in the selected code.'));
-        } else {
+        else {
             console.log(chalk.yellow('  Issues found:'));
             analysis.issues.forEach((issue) => {
                 const severityColor =
@@ -486,6 +475,33 @@ export class UI {
             this.displayDifference(change);
         });
 
+        if (progress.nextStep)
+            console.log(chalk.blue(`\nNext step: ${progress.nextStep}`));
+    }
+
+
+    /**
+     * Displays the progress of the generation process.
+     * Shows the percentage of completion and details of each change.
+     * @param {GenerationProgress} progress - The progress object containing changes and next steps.
+     */
+    displayGenerationProgress(progress: GenerationProgress): void {
+        console.log(
+            chalk.bold.blue(`\n⚙️ Code Generation Progress: ${progress.progress}%`)
+        );
+
+        progress.changes.forEach((change, index) => {
+            console.log(
+                chalk.yellow(`\nChange #${index + 1}: ${change.type} at ${change.location}`)
+            );
+            console.log(`File: ${change.filePath}`);
+            console.log(`Reason: ${change.explanation}`);
+
+            if (change.originalCode && change.newCode) {
+                this.displayDifference(change);
+            }
+        });
+
         if (progress.nextStep) {
             console.log(chalk.blue(`\nNext step: ${progress.nextStep}`));
         }
@@ -514,6 +530,30 @@ export class UI {
         console.log(chalk.bold('\nFiles Changed:'));
         result.changes.forEach((change) => {
             console.log(`  - ${change.filePath}`);
+        });
+    }
+
+    /**
+     * Displays the summary of the generation process.
+     * Shows the summary, improvements, testing recommendations, and files changed.
+     * @param {GenerationComplete} result - The result object containing summary and changes.
+     */
+    displayGenerationCompletionSummary(result: GenerationComplete): void {
+        console.log(chalk.bold.green('\n✅ Code Generation Complete!'));
+        console.log(chalk.bold('\nSummary:'));
+        console.log(result.summary);
+
+        console.log(chalk.bold('\nTesting Recommendations:'));
+        result.testingRecommendations.forEach((recommendation, index) => {
+            console.log(`  ${index + 1}. ${recommendation}`);
+        });
+
+        console.log(chalk.bold('\nUsage Instructions:'));
+        console.log(result.usageInstructions);
+
+        console.log(chalk.bold('\nFiles Created/Modified:'));
+        result.changes.forEach((change) => {
+            console.log(`  - ${change.filePath} (${change.type})`);
         });
     }
 
@@ -550,9 +590,9 @@ export class UI {
     /**
      * Displays the difference between the original and new code.
      * Uses color coding to indicate additions, removals, and context.
-     * @param {RefactorChange} change - The change object containing original and new code.
+     * @param {CodeChange} change - The change object containing original and new code.
      */
-    private displayDifference(change: RefactorChange) {
+    private displayDifference(change: CodeChange) {
         console.log('\nDiff:');
         const parts = diffLines(change.originalCode || '', change.newCode);
         parts.forEach((part: any) => {
@@ -561,19 +601,18 @@ export class UI {
                 : part.removed
                     ? chalk.red
                     : chalk.gray;
-            if (part.added) {
+            if (part.added)
                 console.log(color(`+ ${part.value}`));
-            } else if (part.removed) {
+            else if (part.removed)
                 console.log(color(`- ${part.value}`));
-            } else {
+            else {
                 const context = part.value
                     .split('\n')
                     .slice(0, 2)
                     .join('\n')
                     .trim();
-                if (context) {
+                if (context)
                     console.log(color(`  ${context}${part.value.split('\n').length > 2 ? '...' : ''}`));
-                }
             }
         });
     }

@@ -168,38 +168,12 @@ export class FileManager {
     }
 
     /**
-     * Generates a project tree based on the specified file pattern and ignored paths.
-     * @param ignoredPaths - Additional paths to ignore.
-     * @param filePattern - The pattern to match files against.
-     * @returns An array of file paths that match the pattern.
-     */
-    async getProjectTree(ignoredPaths: string[] = [], filePattern: string = '**/*.*'): Promise<string[]> {
-        const allIgnore = [...this.ignoredPaths, ...ignoredPaths]; // Combine default ignored paths with additional ignored paths
-
-        try {
-            // Use glob to find files matching the pattern
-            const files = await glob(filePattern, {
-                cwd: this.projectRoot, // Set the current working directory to the project root
-                ignore: allIgnore, // Ignore specified paths
-                nodir: true, // Ignore directories
-                dot: false, // Ignore dot files
-            });
-
-            return files.sort(); // Sort the files alphabetically
-        } catch (error) {
-            console.error('Error generating project tree:', error);
-            throw error;
-        }
-    }
-
-    /**
      * Applies changes to files based on the provided changes array.
      * @param changes - An array of file changes to apply.
      */
     async applyChanges(changes: FileChange[]): Promise<void> {
-        for (const change of changes) { // Iterate through each change
+        for (const change of changes) // Iterate through each change
             await this.writeFile(change.filePath, change.fullContent); // Write the changes to the file
-        }
     }
 
     /**
