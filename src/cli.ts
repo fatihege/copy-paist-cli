@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 import {Command} from 'commander';
-import dotenv from 'dotenv';
 import {showMainMenu} from './menu';
 
 const program = new Command();
@@ -19,6 +18,3 @@ program.action(async (options) => {
 
 // Parse command line arguments
 program.parse(process.argv);
-
-// Load environment variables from .env file
-dotenv.config();

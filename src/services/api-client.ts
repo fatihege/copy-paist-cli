@@ -8,6 +8,7 @@ import {
     RefactorResponse
 } from '../types';
 import {SocketClient} from './socket-client';
+import {config} from '../config';
 
 /**
  * ApiClient class to handle API requests and socket connections.
@@ -16,7 +17,7 @@ export class ApiClient {
     /**
      * The base URL for the API.
      */
-    private readonly baseUrl: string = `${process.env.API_URL}/api`;
+    private readonly baseUrl: string = `${config.API_URL}/api`;
 
     /**
      * The socket instance used for real-time communication.

@@ -1,4 +1,5 @@
 import {io, Socket} from 'socket.io-client';
+import {config} from '../config';
 
 export class SocketClient {
     private static instance: SocketClient;
@@ -6,7 +7,7 @@ export class SocketClient {
 
     private constructor() {
         // Set the socket connection to the server
-        this.socket = io(process.env.API_URL || 'http://localhost:3001', {
+        this.socket = io(config.API_URL, {
             transports: ['websocket'],
         });
     }
