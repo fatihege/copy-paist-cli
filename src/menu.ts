@@ -42,4 +42,6 @@ export async function showMainMenu(options: any) {
     if (result !== 'EXIT') {
         return showMainMenu(options);
     }
+
+    process.exit(0);
 }

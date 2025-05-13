@@ -54,7 +54,6 @@ export class UI {
             {name: '⬅️ Go back', value: 'BACK'}
         ];
 
-        console.clear();
         const {pattern} = await inquirer.prompt([
             {
                 type: 'list',

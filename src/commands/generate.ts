@@ -99,6 +99,7 @@ export async function handleGenerate(
 
                     console.log(chalk.bold.blue('\n🛠️ Planned approach:'));
                     console.log(analysisResult.approach);
+                    console.log();
 
                     const {continueAction} = await inquirer.prompt([
                         {
