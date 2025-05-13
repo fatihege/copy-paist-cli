@@ -121,3 +121,32 @@ export interface GenerationComplete {
     testingRecommendations: string[]; // Suggestions for testing the generated code
     usageInstructions: string; // Instructions for using the generated code
 }
+
+export interface ExplanationRequest {
+    code: string; // The code to be explained
+    model: string; // Model name to use for generation
+}
+
+export interface ExplanationResponse {
+    success: boolean; // Indicates if the explanation process was successful
+    sessionId: string; // Unique identifier for the explanation session
+    status: string; // Status of the explanation operation
+}
+
+export interface Explanation {
+    overview: string; // A high-level summary of the code or explanation
+    details: Array<{ // Detailed breakdown of the code sections
+        section: string; // Name or identifier of the code section
+        code: string; // The actual code snippet for the section
+        explanation: string; // Explanation of the code snippet
+    }>;
+    concepts: Array<{ // Key concepts related to the code
+        name: string; // Name of the concept
+        explanation: string; // Description of the concept
+    }>;
+    suggestedImprovements: string[]; // List of suggested improvements for the code
+    execution: { // Information about the code execution
+        flowDescription: string; // Description of the execution flow
+        edgeCases?: string[]; // Optional list of edge cases to consider
+    };
+}

@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 import inquirer from 'inquirer';
-import {handleGenerate, handleRefactor} from './commands';
+import {handleExplain, handleGenerate, handleRefactor} from './commands';
 import {ApiClient} from './services/api-client';
 import {FileManager} from './services/file-manager';
 import {UI} from './ui/ui';
@@ -37,11 +37,9 @@ export async function showMainMenu(options: any) {
     else if (command === 'refactor')
         result = await handleRefactor(apiClient, fileManager, ui, options);
     else if (command === 'explain')
-        console.log(chalk.bold.green('📚 Explain Code'));
+        result = await handleExplain(apiClient, fileManager, ui, options);
 
-    if (result !== 'EXIT') {
-        return showMainMenu(options);
-    }
+    if (result !== 'EXIT') return showMainMenu(options);
 
     process.exit(0);
 }

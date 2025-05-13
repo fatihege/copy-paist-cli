@@ -1,9 +1,13 @@
 import axios from 'axios';
 import {
-    ContinueGenerationRequest, ContinueGenerationResponse,
+    ContinueGenerationRequest,
+    ContinueGenerationResponse,
     ContinueRefactorRequest,
     ContinueRefactorResponse,
-    GenerationRequest, GenerationResponse,
+    ExplanationRequest,
+    ExplanationResponse,
+    GenerationRequest,
+    GenerationResponse,
     RefactorRequest,
     RefactorResponse
 } from '../types';
@@ -26,7 +30,7 @@ export class ApiClient {
 
     /**
      * Start a refactor session
-     * @param request - The refactor request object
+     * @param {RefactorRequest} request - The refactor request object
      * @returns - The refactor response object
      */
     async startRefactorSessionStreaming(request: RefactorRequest): Promise<{ sessionId: string }> {
@@ -43,7 +47,7 @@ export class ApiClient {
 
     /**
      * Continue a refactor session
-     * @param request - The refactor request object for continuation
+     * @param {ContinueRefactorRequest} request - The refactor request object for continuation
      * @returns - The refactor response object
      */
     async continueRefactorSessionStreaming(request: ContinueRefactorRequest): Promise<ContinueRefactorResponse> {
@@ -60,7 +64,7 @@ export class ApiClient {
 
     /**
      * Start a generation session
-     * @param request - The generation request object
+     * @param {GenerationRequest} request - The generation request object
      * @returns - The generation response object
      */
     async startGenerationSessionStreaming(request: GenerationRequest): Promise<{ sessionId: string }> {
@@ -77,13 +81,30 @@ export class ApiClient {
 
     /**
      * Continue a generation session
-     * @param request - The generation request object for continuation
+     * @param {ContinueGenerationRequest} request - The generation request object for continuation
      * @returns - The generation response object
      */
     async continueGenerationSessionStreaming(request: ContinueGenerationRequest): Promise<ContinueGenerationResponse> {
         await SocketClient.getInstance().ready();
         const response = await axios.post<ContinueGenerationResponse>(
             `${this.baseUrl}/ai/generate/continue`,
+            {
+                ...request,
+                socketId: this.socket.id,
+            }
+        );
+        return response.data;
+    }
+
+    /**
+     * Sends a request to explain the provided code using the AI service.
+     * @param {ExplanationRequest} request - The explanation request object containing the code to be explained and the model to use.
+     * @returns - A promise that resolves to the explanation response object.
+     */
+    async explainCodeStream(request: ExplanationRequest): Promise<ExplanationResponse> {
+        await SocketClient.getInstance().ready();
+        const response = await axios.post<ExplanationResponse>(
+            `${this.baseUrl}/ai/explain`,
             {
                 ...request,
                 socketId: this.socket.id,

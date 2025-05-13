@@ -10,7 +10,7 @@ import {
     RefactorAnalysis,
     CodeChange,
     RefactorComplete,
-    RefactorProgress, GenerationComplete
+    RefactorProgress, GenerationComplete, Explanation
 } from '../types';
 
 /**
@@ -614,5 +614,55 @@ export class UI {
                     console.log(color(`  ${context}${part.value.split('\n').length > 2 ? '...' : ''}`));
             }
         });
+    }
+
+    /**
+     * Displays the explanation of the code, including overview,
+     * detailed breakdown, concepts, suggested improvements,
+     * execution flow, and any edge cases.
+     * @param explanation The Explanation object to display
+     */
+    public displayExplanation(explanation: Explanation): void {
+        console.log(chalk.bold.blue('\n📝 Code Explanation Overview:'));
+        console.log(explanation.overview);
+
+        if (explanation.details.length > 0) {
+            console.log(chalk.bold.blue('\n📄 Detailed Breakdown:'));
+            explanation.details.forEach((detail, idx) => {
+                console.log(chalk.yellow(`\n${idx + 1}. ${detail.section}:`));
+                console.log(detail.code.trim());
+                console.log(chalk.bold(detail.explanation));
+            });
+        }
+
+        if (explanation.concepts.length > 0) {
+            console.log(chalk.bold.blue('\n💡 Key Concepts:'));
+            explanation.concepts.forEach((concept, idx) => {
+                console.log(chalk.yellow(`\n${idx + 1}. ${concept.name}:`));
+                console.log(concept.explanation);
+            });
+        }
+
+        if (explanation.suggestedImprovements.length > 0) {
+            console.log(chalk.bold.blue('\n🔧 Suggested Improvements:'));
+            explanation.suggestedImprovements.forEach((imp, idx) => {
+                console.log(`  ${idx + 1}. ${imp}`);
+            });
+        }
+
+        console.log(chalk.bold.blue('\n🚀 Execution Flow:'));
+        console.log(explanation.execution.flowDescription);
+
+        if (
+            explanation.execution.edgeCases &&
+            explanation.execution.edgeCases.length > 0
+        ) {
+            console.log(chalk.bold.blue('\n⚠️ Edge Cases:'));
+            explanation.execution.edgeCases.forEach((edgeCase, idx) => {
+                console.log(`  ${idx + 1}. ${edgeCase}`);
+            });
+        }
+
+        console.log();
     }
 }
